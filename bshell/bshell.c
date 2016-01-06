@@ -5,9 +5,6 @@
 void commands(void);
 char *parse_args(char *line);
 
-// starting small for now
-int MAX = 100;
-
 int main(int argc, char **argv) {
 
     // config
@@ -22,34 +19,47 @@ int main(int argc, char **argv) {
 
 void commands() {
     char *line = NULL;
-    size_t len = 0;
     char **args;
     char *status;
+    size_t len = 0;
 
     do {
         // kirby prompt
         printf("(>**)> ");
         getline(&line, &len, stdin);
-        free(line); 
+        *args = parse_args(line);
         /*
-        args = parse_arg(line);
         status = execute(args);
-
-        free(args);
         */
-    } while(status);
+        free(line);
+        free(args);
+    } while(1);
 }
 
 char *parse_args(char *line) {
-    int i = 0;
-    const char delims[2] = " ";
-    // for testing purposes ...
-    int SIZE = 10;
-    char *args[SIZE+1];
+    // tokenize the string on whitespace only for now
+    const char delim[2] = " ";
+    char *token = NULL;
+    char **args = NULL;
+    int n_spaces = 0,
+        i = 0;
 
-    // strtok
+    token = strtok(line, delim);
+    while (token != NULL) {
+        args = realloc(args, sizeof(char*) * ++n_spaces);
+        //check for successful reallocation
+        if (args == NULL) {
+            return NULL;
+        }
+        args[n_spaces-1] = token;
+        token = strtok(NULL,delim);
+    }
+    // end in null
+    args = realloc(args, sizeof(char*) * ++n_spaces);
+    args[n_spaces] = '\0';
 
-    for (i = 0; i < MAX; i++) {
-        
-    }   
+    for (i = 0; args[i] != '\0'; i++) {
+        printf("%s ", args[i]);
+    }
+    return *args;   
 }
