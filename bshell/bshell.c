@@ -22,17 +22,16 @@ int main(int argc, char **argv) {
 void commands() {
     char *line = NULL;
     char **args = NULL;
-    char *status = NULL;
     char **iterator = NULL;
     size_t len = 0;
-    int i = 0;
+    int status = 0;
 
     do {
         // kirby prompt
         printf("(>**)> ");
         getline(&line, &len, stdin);
         args = parse_args(line);
-        status = execute(args);
+        execute(args);
     } while(1);
 }
 
@@ -82,4 +81,7 @@ void launch_process(char**args) {
 }
 
 void execute(char **args) {
+    /* check for shell builtins*/
+ 
+    launch_process(args);
 }
