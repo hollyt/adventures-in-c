@@ -4,6 +4,8 @@
 
 void commands(void);
 char **parse_args(char *line);
+void launch_process(char **args);
+void execute(char **args);
 
 int main(int argc, char **argv) {
 
@@ -30,9 +32,7 @@ void commands() {
         printf("(>**)> ");
         getline(&line, &len, stdin);
         args = parse_args(line);
-        /*
         status = execute(args);
-        */
     } while(1);
 }
 
@@ -58,4 +58,28 @@ char **parse_args(char *line) {
     args[n_spaces] = NULL;
 
     return args;   
+}
+
+void launch_process(char**args) {
+    // must fork & exec a new process to execute the command
+    pid_t pid, wpid;
+
+    pid = fork();
+    if (pid == 0) { /*fork was successful - child process*/
+        /*try to execute the command*/
+        if (execvp(args[0], args) == -1) {
+            perror("bshell");
+            exit(EXIT_FAILURE);
+        }
+    }
+    else if (pid < 0) { /*fork failed*/
+        perror("bshell");
+    }
+    else { /*fork was successful - parent process*/
+        /* wait while child process executes the command*/
+        wpid = waitpid(pid, NULL, 0);
+    }
+}
+
+void execute(char **args) {
 }
