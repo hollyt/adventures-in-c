@@ -4,9 +4,22 @@
 
 void commands(void);
 char **parse_args(char *line);
-void launch_process(char **args);
-void execute(char **args);
+int launch_process(char **args);
+int execute(char **args);
+/* SHELL BUILTINS */
+int num_builtins();
+int bshell_exit(char **args);
 
+/* map shell builtin names to thier functions */
+char *bshell_builtins[] = {
+    "exit"
+};
+
+int (*builtin_funcs[]) (char **) = {
+    &bshell_exit
+};
+
+/* MAIN */
 int main(int argc, char **argv) {
 
     // config
@@ -31,8 +44,8 @@ void commands() {
         printf("(>**)> ");
         getline(&line, &len, stdin);
         args = parse_args(line);
-        execute(args);
-    } while(1);
+        status = execute(args);
+    } while(status);
 }
 
 char **parse_args(char *line) {
@@ -59,7 +72,7 @@ char **parse_args(char *line) {
     return args;   
 }
 
-void launch_process(char**args) {
+int launch_process(char**args) {
     // must fork & exec a new process to execute the command
     pid_t pid, wpid;
 
@@ -78,10 +91,30 @@ void launch_process(char**args) {
         /* wait while child process executes the command*/
         wpid = waitpid(pid, NULL, 0);
     }
+    return 1;
 }
 
-void execute(char **args) {
+int execute(char **args) {
+    int status,
+        i;
     /* check for shell builtins*/
+    for (i = 0; i < num_builtins(); i++) {
+        if (strcmp(args[0], bshell_builtins[i]) == 0){
+            return (*builtin_funcs[i])(args);
+        }
+     }
  
-    launch_process(args);
+    /*if not shell builtin, execute here*/
+    status = launch_process(args);
+    return status;
+}
+
+/* SHELL BUILTINS */
+int num_builtins() {
+    return sizeof(bshell_builtins) / sizeof(char *);
+}
+
+int bshell_exit(char **args) {
+    /*all commands but exit return 1 to continue the loop*/
+    return 0;
 }
