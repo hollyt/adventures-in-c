@@ -12,7 +12,7 @@ int bshell_exit();
 
 /*map shell builtin names to thier functions*/
 char *bshell_builtins[] = {
-    "exit\n"
+    "exit"
 };
 
 int (*builtin_funcs[]) (char **args) = {
@@ -28,7 +28,7 @@ int main(int argc, char **argv) {
     commands();
 
     /* cleanup */
-
+    
     return 0;
 }
 
@@ -37,14 +37,29 @@ void commands() {
     char **args = NULL;
     char **iterator = NULL;
     size_t len = 0;
-    int status = 0;
+    int i = 0,
+        status = 0;
 
     do {
         /*kirby prompt*/
         printf("(>**)> ");
         getline(&line, &len, stdin);
+        /*replace newline with null char*/
+        for (i = len-1; i >= 0; i--) {
+            if (line[i] == '\n') {
+                line[i] = '\0';
+            }
+        }
         args = parse_args(line);
         status = execute(args);
+
+        /*cleanup*/
+        free(line);
+        line = NULL;
+        for (i = 0; args[i] != NULL; i++) {
+            free(args[i]);
+        }
+        free(args);
     } while(status);
 }
 
