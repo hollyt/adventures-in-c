@@ -8,26 +8,26 @@ int launch_process(char **args);
 int execute(char **args);
 /* SHELL BUILTINS */
 int num_builtins();
-int bshell_exit(char **args);
+int bshell_exit();
 
-/* map shell builtin names to thier functions */
+/*map shell builtin names to thier functions*/
 char *bshell_builtins[] = {
-    "exit"
+    "exit\n"
 };
 
-int (*builtin_funcs[]) (char **) = {
+int (*builtin_funcs[]) (char **args) = {
     &bshell_exit
 };
 
 /* MAIN */
 int main(int argc, char **argv) {
 
-    // config
+    /* config */
 
-    // command loop
+    /* command loop */
     commands();
 
-    // cleanup
+    /* cleanup */
 
     return 0;
 }
@@ -40,7 +40,7 @@ void commands() {
     int status = 0;
 
     do {
-        // kirby prompt
+        /*kirby prompt*/
         printf("(>**)> ");
         getline(&line, &len, stdin);
         args = parse_args(line);
@@ -49,7 +49,7 @@ void commands() {
 }
 
 char **parse_args(char *line) {
-    // tokenize the string on whitespace only for now
+    /*tokenize the string on whitespace only for now*/
     const char delim[2] = " ";
     char *token = NULL;
     char **args = malloc(sizeof **args);
@@ -65,15 +65,14 @@ char **parse_args(char *line) {
         args[n_spaces-1] = token;
         token = strtok(NULL,delim);
     }
-    // end in null
+    /*end in null*/
     args = realloc(args, sizeof(char*) * n_spaces+1);
     args[n_spaces] = NULL;
-
     return args;   
 }
 
 int launch_process(char**args) {
-    // must fork & exec a new process to execute the command
+    /*must fork & exec a new process to execute the command*/
     pid_t pid, wpid;
 
     pid = fork();
@@ -97,7 +96,7 @@ int launch_process(char**args) {
 int execute(char **args) {
     int status,
         i;
-    /* check for shell builtins*/
+    /*check for shell builtins*/
     for (i = 0; i < num_builtins(); i++) {
         if (strcmp(args[0], bshell_builtins[i]) == 0){
             return (*builtin_funcs[i])(args);
@@ -114,7 +113,7 @@ int num_builtins() {
     return sizeof(bshell_builtins) / sizeof(char *);
 }
 
-int bshell_exit(char **args) {
+int bshell_exit() {
     /*all commands but exit return 1 to continue the loop*/
     return 0;
 }
