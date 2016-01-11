@@ -11,20 +11,23 @@ int num_builtins();
 int bshell_echo();
 int bshell_exit();
 int bshell_cd(char **args);
+int bshell_help();
 
 /*map shell builtin names to thier functions*/
 char *bshell_builtins[] = {
     "exit",
     "logout",
     "echo",
-    "cd"
+    "cd",
+    "help"
 };
 
 int (*builtin_funcs[]) (char **args) = {
     &bshell_exit,
     &bshell_exit,
     &bshell_echo,
-    &bshell_cd
+    &bshell_cd,
+    &bshell_help
 };
 
 /* MAIN */
@@ -157,6 +160,20 @@ int bshell_echo(char **args) {
 int bshell_cd(char **args) {
     if (chdir(args[1]) == -1) {
         perror("bshell");
+    }
+    return 1;
+}
+
+int bshell_help() {
+    int i;
+
+    printf("                               ");
+    printf("BSHELL - BABY SHELL\n");
+    printf("                              ");
+    printf("=====================\n");
+    printf("BUILTINS:\n");
+    for (i = 0; i < num_builtins(); i++) {
+        printf("%s\n", bshell_builtins[i]);
     }
     return 1;
 }
