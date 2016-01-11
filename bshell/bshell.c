@@ -1,3 +1,5 @@
+#include <sys/wait.h>
+#include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -71,7 +73,9 @@ void commands() {
 }
 
 char **parse_args(char *line) {
-    /*tokenize the string on whitespace only for now*/
+    /*tokenize the string on whieding the bash man pages and with respect to this post.
+
+I am still having trouble understanding what exactly the eval comespace only for now*/
     const char delim[2] = " ";
     char *token = NULL;
     char **args = malloc(sizeof **args);
