@@ -8,6 +8,7 @@ int launch_process(char **args);
 int execute(char **args);
 /* SHELL BUILTINS */
 int num_builtins();
+int bshell_echo();
 int bshell_exit();
 int bshell_cd(char **args);
 
@@ -15,12 +16,14 @@ int bshell_cd(char **args);
 char *bshell_builtins[] = {
     "exit",
     "logout",
+    "echo",
     "cd"
 };
 
 int (*builtin_funcs[]) (char **args) = {
     &bshell_exit,
     &bshell_exit,
+    &bshell_echo,
     &bshell_cd
 };
 
@@ -132,6 +135,23 @@ int num_builtins() {
 int bshell_exit() {
     /*all commands but exit return 1 to continue the loop*/
     return 0;
+}
+
+int bshell_echo(char **args) {
+    int i;
+
+    /*start @ 1st element becuase 0th is 'echo'*/
+    for (i = 1; args[i] != NULL; i++) {
+        if (i == 1) {
+            printf("%s", args[i]);
+        }
+        else {
+            printf(" %s", args[i]);
+        }
+    }
+    printf("\n");
+
+    return 1;
 }
 
 int bshell_cd(char **args) {
