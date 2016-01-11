@@ -14,10 +14,12 @@ int bshell_cd(char **args);
 /*map shell builtin names to thier functions*/
 char *bshell_builtins[] = {
     "exit",
+    "logout",
     "cd"
 };
 
 int (*builtin_funcs[]) (char **args) = {
+    &bshell_exit,
     &bshell_exit,
     &bshell_cd
 };
