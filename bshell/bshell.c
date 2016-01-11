@@ -9,14 +9,17 @@ int execute(char **args);
 /* SHELL BUILTINS */
 int num_builtins();
 int bshell_exit();
+int bshell_cd(char **args);
 
 /*map shell builtin names to thier functions*/
 char *bshell_builtins[] = {
-    "exit"
+    "exit",
+    "cd"
 };
 
 int (*builtin_funcs[]) (char **args) = {
-    &bshell_exit
+    &bshell_exit,
+    &bshell_cd
 };
 
 /* MAIN */
@@ -129,3 +132,9 @@ int bshell_exit() {
     return 0;
 }
 
+int bshell_cd(char **args) {
+    if (chdir(args[1]) == -1) {
+        perror("bshell");
+    }
+    return 1;
+}
