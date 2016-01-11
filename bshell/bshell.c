@@ -56,10 +56,6 @@ void commands() {
         /*cleanup*/
         free(line);
         line = NULL;
-        for (i = 0; args[i] != NULL; i++) {
-            free(args[i]);
-        }
-        free(args);
     } while(status);
 }
 
@@ -132,3 +128,4 @@ int bshell_exit() {
     /*all commands but exit return 1 to continue the loop*/
     return 0;
 }
+
