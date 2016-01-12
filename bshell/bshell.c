@@ -34,6 +34,10 @@ int (*builtin_funcs[]) (char **args) = {
 
 /* MAIN */
 int main(int argc, char **argv) {
+    /* set session id*/
+    setsid();
+
+    /* bind to tty */
 
     /* config */
 
