@@ -1,3 +1,6 @@
+/*for get_current_dir_name()*/
+#define _GNU_SOURCE
+
 #include <sys/wait.h>
 #include <unistd.h>
 #include <stdio.h>
@@ -52,14 +55,15 @@ int main(int argc, char **argv) {
 void commands() {
     char *line = NULL;
     char **args = NULL;
+    char *cwd = NULL;
     char **iterator = NULL;
     size_t len = 0;
     int i = 0,
         status = 0;
 
     do {
-        /*kirby prompt*/
-        printf("(>**)> ");
+        cwd = get_current_dir_name();
+        printf("(>**)> [%s] ", cwd);
         getline(&line, &len, stdin);
         /*replace newline with null char*/
         for (i = len-1; i >= 0; i--) {
