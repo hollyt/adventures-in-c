@@ -14,5 +14,4 @@ of bash. :baby:
 - [x] shell builtins
 - [ ] tilde expansion of paths
 - [ ] autocompletion
-- [ ] bind to tty
-- [ ] shell sessions???
+- [x] shell sessions

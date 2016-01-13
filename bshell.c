@@ -40,6 +40,11 @@ int main(int argc, char **argv) {
     /* set session id*/
     setsid();
 
+<<<<<<< HEAD
+=======
+    /* bind to tty */
+
+>>>>>>> e84cbae1a10a8fb2ee9022ed4b4bf534d9e30738
     /* config */
 
     /* command loop */
@@ -88,7 +93,11 @@ char **parse_args(char *line) {
     token = strtok(line, delim);
     while (token != NULL) {
         args = realloc(args, sizeof(char*) * ++n_spaces);
+<<<<<<< HEAD
         /*check for successful reallocation*/
+=======
+        //check for successful reallocation
+>>>>>>> e84cbae1a10a8fb2ee9022ed4b4bf534d9e30738
         if (args == NULL) {
             return NULL;
         }
@@ -102,14 +111,20 @@ char **parse_args(char *line) {
 }
 
 int launch_process(char**args) {
+<<<<<<< HEAD
     /*TODO: implement pipe trick as a semaphore*/
+=======
+>>>>>>> e84cbae1a10a8fb2ee9022ed4b4bf534d9e30738
     /*must fork & exec a new process to execute the command*/
     pid_t pid, wpid;
 
     pid = fork();
     if (pid == 0) { /*fork was successful - child process*/
         /*try to execute the command*/
+<<<<<<< HEAD
         setpgid(pid,0);
+=======
+>>>>>>> e84cbae1a10a8fb2ee9022ed4b4bf534d9e30738
         if (execvp(args[0], args) == -1) {
             perror("bshell");
             exit(EXIT_FAILURE);
