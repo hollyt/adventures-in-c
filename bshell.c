@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h> /*testing*/
 
 void commands(void);
 char **parse_args(char *line);
@@ -105,12 +106,15 @@ int launch_process(char**args) {
     /*TODO: implement pipe trick as a semaphore*/
     
     /*must fork & exec a new process to execute the command*/
-    pid_t pid, wpid;
+    pid_t pid, wpid, shellpid, newpid;
+
+    /*get the shell's process group id*/
+    shellpid = tcgetpgrp(1);
 
     pid = fork();
     if (pid == 0) { /*fork was successful - child process*/
-        /*try to execute the command*/
         /*setpgid(pid,0);*/
+
         if (execvp(args[0], args) == -1) {
             perror("bshell");
             exit(EXIT_FAILURE);
@@ -121,6 +125,13 @@ int launch_process(char**args) {
     }
     else { /*fork was successful - parent process*/
         /* wait while child process executes the command*/
+        
+        /* this doesn't work ...
+        setpgid(pid,0);
+        usleep(1000000);
+        tcsetpgrp(1,pid);
+        kill(pid,SIGCONT);
+        kill(pid,SIGCONT); */
         wpid = waitpid(pid, NULL, 0);
     }
     return 1;
