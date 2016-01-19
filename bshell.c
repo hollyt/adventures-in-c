@@ -146,7 +146,6 @@ int launch_process(char**args) {
 
     pid = fork();
     if (pid == 0) { /*fork was successful - child process*/
-        /*setpgid(pid,0);*/
         if (pgid == 0) {
             pgid = pid;
         }
