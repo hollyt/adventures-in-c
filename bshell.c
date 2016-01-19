@@ -63,37 +63,31 @@ void init_shell() {
     pid_t shell_pgid;
     int shell_is_interactive;
 
-    /*set new session id for the shell?
-    setsid();*/
-
     /*make sure shell is foreground process*/
     shell_terminal = STDIN_FILENO;
-    shell_is_interactive = isatty(shell_terminal);
-    if (shell_is_interactive) {
-        while (tcgetpgrp(shell_terminal) != (shell_pgid = getpgrp())) {
-            kill (- shell_pgid, SIGTTIN);
-        }
-        /*ignore interactive and job-control signals so the
-        shell doesn't kill its own process*/
-        signal(SIGINT, SIG_IGN);
-        signal(SIGQUIT, SIG_IGN);
-        signal(SIGTSTP, SIG_IGN);
-        signal(SIGTTIN, SIG_IGN);
-        signal(SIGTTOU, SIG_IGN);
-        signal(SIGCHLD, SIG_IGN);
-
-        /*put ourselves in our own process group*/
-        shell_pgid = getpid();
-        if (setpgid(shell_pgid, shell_pgid) < 0) {
-            perror("Couldn't put the shell in its own process group.");
-            exit(1);
-        }
-
-        /*grab control of the terminal*/
-        tcsetpgrp(shell_terminal, shell_pgid);
-        /*save default terminal attributes for shell*/
-        tcgetattr(shell_terminal, &shell_tmodes);
+    while (tcgetpgrp(shell_terminal) != (shell_pgid = getpgrp())) {
+        kill (- shell_pgid, SIGTTIN);
     }
+    /*ignore interactive and job-control signals so the
+    shell doesn't kill its own process*/
+    signal(SIGINT, SIG_IGN);
+    signal(SIGQUIT, SIG_IGN);
+    signal(SIGTSTP, SIG_IGN);
+    signal(SIGTTIN, SIG_IGN);
+    signal(SIGTTOU, SIG_IGN);
+    signal(SIGCHLD, SIG_IGN);
+
+    /*put ourselves in our own process group*/
+    shell_pgid = getpid();
+    if (setpgid(shell_pgid, shell_pgid) < 0) {
+        perror("Couldn't put the shell in its own process group.");
+        exit(1);
+    }
+
+    /*grab control of the terminal*/
+    tcsetpgrp(shell_terminal, shell_pgid);
+    /*save default terminal attributes for shell*/
+    tcgetattr(shell_terminal, &shell_tmodes);
 }
 
 void commands() {
@@ -153,7 +147,6 @@ int launch_process(char**args) {
     pid = fork();
     if (pid == 0) { /*fork was successful - child process*/
         /*setpgid(pid,0);*/
-        pid = getpid();
         if (pgid == 0) {
             pgid = pid;
         }
@@ -185,7 +178,12 @@ int launch_process(char**args) {
 
 int execute(char **args) {
     int status,
-        i;
+        i,
+        infile,
+        outfile,
+        new_pipe[2];
+    pid_t pid;
+
     /*check for shell builtins*/
     for (i = 0; i < num_builtins(); i++) {
         if (strcmp(args[0], bshell_builtins[i]) == 0){
