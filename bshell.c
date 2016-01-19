@@ -100,6 +100,7 @@ void commands() {
         status = 0;
 
     do {
+        /*print current dir - full path is too long*/
         /*cwd = get_current_dir_name();*/
         printf("(>**)> ");
         getline(&line, &len, stdin);
@@ -138,7 +139,7 @@ char **parse_args(char *line) {
     /*end in null*/
     args = realloc(args, sizeof(char*) * n_spaces+1);
     args[n_spaces] = NULL;
-    return args;   
+    return args;
 }
 
 int launch_process(char**args) {
@@ -151,7 +152,7 @@ int launch_process(char**args) {
         }
         setpgid(pid, pgid);
         tcsetpgrp(shell_terminal, pgid);
- 
+
         /*signal handling*/
         signal(SIGINT, SIG_DFL);
         signal(SIGQUIT, SIG_DFL);
@@ -189,7 +190,7 @@ int execute(char **args) {
             return (*builtin_funcs[i])(args);
         }
      }
- 
+
     /*if not shell builtin, execute here*/
     status = launch_process(args);
     return status;
