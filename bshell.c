@@ -40,6 +40,7 @@ int (*builtin_funcs[]) (char **args) = {
 
 /*for process control*/
 struct termios shell_tmodes;
+int shell_terminal;
 
 /* MAIN */
 int main(int argc, char **argv) {
@@ -60,11 +61,11 @@ int main(int argc, char **argv) {
 void init_shell() {
     /*keep track of shell attributes*/
     pid_t shell_pgid;
-    int shell_terminal,
-        shell_is_interactive;
+    int shell_is_interactive;
 
-    /*set new session id for the shell*/
-    //setsid();    
+    /*set new session id for the shell?
+    setsid();*/
+
     /*make sure shell is foreground process*/
     shell_terminal = STDIN_FILENO;
     shell_is_interactive = isatty(shell_terminal);
@@ -147,18 +148,25 @@ char **parse_args(char *line) {
 }
 
 int launch_process(char**args) {
-    /*TODO: implement pipe trick as a semaphore*/
-    int foreground = 1;
-
-    /*must fork & exec a new process to execute the command*/
-    pid_t pid, wpid, pgid, shellpid, newpid;
-
-    /*get the shell's process group id*/
-    shellpid = tcgetpgrp(1);
+    pid_t pid, wpid, pgid;
 
     pid = fork();
     if (pid == 0) { /*fork was successful - child process*/
         /*setpgid(pid,0);*/
+        pid = getpid();
+        if (pgid == 0) {
+            pgid = pid;
+        }
+        setpgid(pid, pgid);
+        tcsetpgrp(shell_terminal, pgid);
+ 
+        /*signal handling*/
+        signal(SIGINT, SIG_DFL);
+        signal(SIGQUIT, SIG_DFL);
+        signal(SIGTSTP, SIG_DFL);
+        signal(SIGTTIN, SIG_DFL);
+        signal(SIGTTOU, SIG_DFL);
+        signal(SIGCHLD, SIG_DFL);
 
         if (execvp(args[0], args) == -1) {
             perror("bshell");
