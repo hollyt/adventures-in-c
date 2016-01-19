@@ -2,12 +2,14 @@
 #define _GNU_SOURCE
 
 #include <sys/wait.h>
+#include <termios.h>
 #include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h> /*testing*/
 
+void init_shell();
 void commands(void);
 char **parse_args(char *line);
 int launch_process(char **args);
@@ -19,7 +21,7 @@ int bshell_exit();
 int bshell_cd(char **args);
 int bshell_help();
 
-/*map shell builtin names to thier functions*/
+/*map shell builtin names to their functions*/
 char *bshell_builtins[] = {
     "exit",
     "logout",
@@ -36,10 +38,12 @@ int (*builtin_funcs[]) (char **args) = {
     &bshell_help
 };
 
+/*for process control*/
+struct termios shell_tmodes;
+
 /* MAIN */
 int main(int argc, char **argv) {
-    /* set session id*/
-    setsid();
+    init_shell();
 
     /* config */
 
@@ -47,8 +51,48 @@ int main(int argc, char **argv) {
     commands();
 
     /* cleanup */
-    
+
     return 0;
+}
+
+/*initialize shell & set up signal & job control*/
+/*www.gnu.org/software/libc/manual/html_node/Initializing-the-Shell.html*/
+void init_shell() {
+    /*keep track of shell attributes*/
+    pid_t shell_pgid;
+    int shell_terminal,
+        shell_is_interactive;
+
+    /*set new session id for the shell*/
+    //setsid();    
+    /*make sure shell is foreground process*/
+    shell_terminal = STDIN_FILENO;
+    shell_is_interactive = isatty(shell_terminal);
+    if (shell_is_interactive) {
+        while (tcgetpgrp(shell_terminal) != (shell_pgid = getpgrp())) {
+            kill (- shell_pgid, SIGTTIN);
+        }
+        /*ignore interactive and job-control signals so the
+        shell doesn't kill its own process*/
+        signal(SIGINT, SIG_IGN);
+        signal(SIGQUIT, SIG_IGN);
+        signal(SIGTSTP, SIG_IGN);
+        signal(SIGTTIN, SIG_IGN);
+        signal(SIGTTOU, SIG_IGN);
+        signal(SIGCHLD, SIG_IGN);
+
+        /*put ourselves in our own process group*/
+        shell_pgid = getpid();
+        if (setpgid(shell_pgid, shell_pgid) < 0) {
+            perror("Couldn't put the shell in its own process group.");
+            exit(1);
+        }
+
+        /*grab control of the terminal*/
+        tcsetpgrp(shell_terminal, shell_pgid);
+        /*save default terminal attributes for shell*/
+        tcgetattr(shell_terminal, &shell_tmodes);
+    }
 }
 
 void commands() {
@@ -104,9 +148,10 @@ char **parse_args(char *line) {
 
 int launch_process(char**args) {
     /*TODO: implement pipe trick as a semaphore*/
-    
+    int foreground = 1;
+
     /*must fork & exec a new process to execute the command*/
-    pid_t pid, wpid, shellpid, newpid;
+    pid_t pid, wpid, pgid, shellpid, newpid;
 
     /*get the shell's process group id*/
     shellpid = tcgetpgrp(1);
@@ -125,13 +170,6 @@ int launch_process(char**args) {
     }
     else { /*fork was successful - parent process*/
         /* wait while child process executes the command*/
-        
-        /* this doesn't work ...
-        setpgid(pid,0);
-        usleep(1000000);
-        tcsetpgrp(1,pid);
-        kill(pid,SIGCONT);
-        kill(pid,SIGCONT); */
         wpid = waitpid(pid, NULL, 0);
     }
     return 1;
