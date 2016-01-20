@@ -1,6 +1,7 @@
 /*for get_current_dir_name()*/
 #define _GNU_SOURCE
 
+#include <dirent.h>
 #include <sys/wait.h>
 #include <termios.h>
 #include <unistd.h>
@@ -20,22 +21,25 @@ int bshell_echo();
 int bshell_exit();
 int bshell_cd(char **args);
 int bshell_help();
+int bshell_ls();
 
 /*map shell builtin names to their functions*/
 char *bshell_builtins[] = {
-    "exit",
-    "logout",
-    "echo",
     "cd",
-    "help"
+    "echo",
+    "exit",
+    "help",
+    "logout",
+    "ls"
 };
 
 int (*builtin_funcs[]) (char **args) = {
-    &bshell_exit,
-    &bshell_exit,
-    &bshell_echo,
     &bshell_cd,
-    &bshell_help
+    &bshell_echo,
+    &bshell_exit,
+    &bshell_help,
+    &bshell_exit,
+    &bshell_ls
 };
 
 /*for process control*/
@@ -201,9 +205,11 @@ int num_builtins() {
     return sizeof(bshell_builtins) / sizeof(char *);
 }
 
-int bshell_exit() {
-    /*all commands but exit return 1 to continue the loop*/
-    return 0;
+int bshell_cd(char **args) {
+    if (chdir(args[1]) == -1) {
+        perror("bshell");
+    }
+    return 1;
 }
 
 int bshell_echo(char **args) {
@@ -223,11 +229,9 @@ int bshell_echo(char **args) {
     return 1;
 }
 
-int bshell_cd(char **args) {
-    if (chdir(args[1]) == -1) {
-        perror("bshell");
-    }
-    return 1;
+int bshell_exit() {
+    /*all commands but exit return 1 to continue the loop*/
+    return 0;
 }
 
 int bshell_help() {
@@ -241,5 +245,23 @@ int bshell_help() {
     for (i = 0; i < num_builtins(); i++) {
         printf("%s\n", bshell_builtins[i]);
     }
+    return 1;
+}
+
+int bshell_ls(char **args) {
+    DIR *dp;
+    struct dirent *dirp;
+
+    if (args[1] == NULL) { /*ls current dir*/
+        dp = opendir(get_current_dir_name());
+    }
+    else {
+        dp = opendir(args[1]);
+    }
+    while ((dirp = readdir(dp)) != NULL) {
+        printf("%s\n", dirp->d_name);
+    }
+
+    closedir(dp);
     return 1;
 }
