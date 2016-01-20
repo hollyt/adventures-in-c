@@ -7,7 +7,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h> /*testing*/
 
 void init_shell();
 void commands(void);
@@ -15,11 +14,11 @@ char **parse_args(char *line);
 int launch_process(char **args);
 int execute(char **args);
 /* SHELL BUILTINS */
-int num_builtins();
 int bshell_echo();
 int bshell_exit();
 int bshell_cd(char **args);
 int bshell_help();
+int num_builtins();
 
 /*map shell builtin names to their functions*/
 char *bshell_builtins[] = {
@@ -97,21 +96,23 @@ void commands() {
     char **iterator = NULL;
     size_t len = 0;
     int i = 0,
-        status = 0;
+        status = 1;
 
     do {
         /*print current dir - full path is too long*/
         /*cwd = get_current_dir_name();*/
         printf("(>**)> ");
         getline(&line, &len, stdin);
-        /*replace newline with null char*/
-        for (i = len-1; i >= 0; i--) {
-            if (line[i] == '\n') {
-                line[i] = '\0';
+        if (line[0] != '\n') { /*nothing is entered*/
+            /*replace newline with null*/
+            for (i = len-1; i >= 0; i--) {
+                if (line[i] == '\n') {
+                    line[i] = '\0';
+                }
             }
+            args = parse_args(line);
+            status = execute(args);
         }
-        args = parse_args(line);
-        status = execute(args);
 
         /*cleanup*/
         free(line);
