@@ -1,7 +1,6 @@
 /*for get_current_dir_name()*/
 #define _GNU_SOURCE
 
-#include <dirent.h>
 #include <sys/wait.h>
 #include <termios.h>
 #include <unistd.h>
@@ -21,7 +20,6 @@ int bshell_echo();
 int bshell_exit();
 int bshell_cd(char **args);
 int bshell_help();
-int bshell_ls();
 
 /*map shell builtin names to their functions*/
 char *bshell_builtins[] = {
@@ -29,8 +27,7 @@ char *bshell_builtins[] = {
     "echo",
     "exit",
     "help",
-    "logout",
-    "ls"
+    "logout"
 };
 
 int (*builtin_funcs[]) (char **args) = {
@@ -38,8 +35,7 @@ int (*builtin_funcs[]) (char **args) = {
     &bshell_echo,
     &bshell_exit,
     &bshell_help,
-    &bshell_exit,
-    &bshell_ls
+    &bshell_exit
 };
 
 /*for process control*/
@@ -245,23 +241,4 @@ int bshell_help() {
     for (i = 0; i < num_builtins(); i++) {
         printf("%s\n", bshell_builtins[i]);
     }
-    return 1;
-}
-
-int bshell_ls(char **args) {
-    DIR *dp;
-    struct dirent *dirp;
-
-    if (args[1] == NULL) { /*ls current dir*/
-        dp = opendir(get_current_dir_name());
-    }
-    else {
-        dp = opendir(args[1]);
-    }
-    while ((dirp = readdir(dp)) != NULL) {
-        printf("%s\n", dirp->d_name);
-    }
-
-    closedir(dp);
-    return 1;
 }
