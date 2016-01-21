@@ -8,34 +8,13 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "builtins.h"
+
 void init_shell();
 void commands(void);
 char **parse_args(char *line);
 int launch_process(char **args);
 int execute(char **args);
-/* SHELL BUILTINS */
-int bshell_echo();
-int bshell_exit();
-int bshell_cd(char **args);
-int bshell_help();
-int num_builtins();
-
-/*map shell builtin names to their functions*/
-char *bshell_builtins[] = {
-    "cd",
-    "echo",
-    "exit",
-    "help",
-    "logout"
-};
-
-int (*builtin_funcs[]) (char **args) = {
-    &bshell_cd,
-    &bshell_echo,
-    &bshell_exit,
-    &bshell_help,
-    &bshell_exit
-};
 
 /*for process control*/
 struct termios shell_tmodes;
@@ -148,11 +127,8 @@ int launch_process(char**args) {
 
     pid = fork();
     if (pid == 0) { /*fork was successful - child process*/
-        if (pgid == 0) {
-            pgid = pid;
-        }
-        setpgid(pid, pgid);
-        tcsetpgrp(shell_terminal, pgid);
+        setpgid(0,0);
+        tcsetpgrp(shell_terminal, getpgrp());
 
         /*signal handling*/
         signal(SIGINT, SIG_DFL);
@@ -172,6 +148,7 @@ int launch_process(char**args) {
     }
     else { /*fork was successful - parent process*/
         /* wait while child process executes the command*/
+        setpgid(pid,pid);
         wpid = waitpid(pid, NULL, 0);
     }
     return 1;
@@ -195,51 +172,4 @@ int execute(char **args) {
     /*if not shell builtin, execute here*/
     status = launch_process(args);
     return status;
-}
-
-/* SHELL BUILTINS */
-int num_builtins() {
-    return sizeof(bshell_builtins) / sizeof(char *);
-}
-
-int bshell_cd(char **args) {
-    if (chdir(args[1]) == -1) {
-        perror("bshell");
-    }
-    return 1;
-}
-
-int bshell_echo(char **args) {
-    int i;
-
-    /*start @ 1st element becuase 0th is 'echo'*/
-    for (i = 1; args[i] != NULL; i++) {
-        if (i == 1) {
-            printf("%s", args[i]);
-        }
-        else {
-            printf(" %s", args[i]);
-        }
-    }
-    printf("\n");
-
-    return 1;
-}
-
-int bshell_exit() {
-    /*all commands but exit return 1 to continue the loop*/
-    return 0;
-}
-
-int bshell_help() {
-    int i;
-
-    printf("                               ");
-    printf("BSHELL - BABY SHELL\n");
-    printf("                              ");
-    printf("=====================\n");
-    printf("BUILTINS:\n");
-    for (i = 0; i < num_builtins(); i++) {
-        printf("%s\n", bshell_builtins[i]);
-    }
 }
