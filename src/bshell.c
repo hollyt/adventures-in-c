@@ -68,18 +68,24 @@ void init_shell() {
 void commands() {
     char *line = NULL;
     char **args = NULL;
-    char *cwd = NULL;
+    char *cwp, *cwd;
     char **iterator = NULL;
     size_t len = 0;
     int i = 0,
+        n = 0,
         status = 1;
 
     do {
         /*print current dir - full path is too long*/
-        /*cwd = get_current_dir_name();*/
-        printf("(>**)> ");
-        getline(&line, &len, stdin);
-        if (line[0] != '\n') { /*nothing is entered*/
+        cwp = get_current_dir_name();
+        cwd = strrchr(cwp,'/');
+        printf("(>**)> **%s** ",cwd+1);
+        n = getline(&line, &len, stdin);
+        if (n == -1) { /*EOF entered*/
+            perror("bshell");
+            status = bshell_exit();
+        }
+        else if (line[0] != '\n') { /*nothing is entered*/
             /*replace newline with null*/
             for (i = len-1; i >= 0; i--) {
                 if (line[i] == '\n') {
@@ -91,6 +97,7 @@ void commands() {
         }
 
         /*cleanup*/
+        free(cwp);
         free(line);
         line = NULL;
     } while(status);
@@ -147,6 +154,7 @@ int launch_process(char**args) {
         /* wait while child process executes the command*/
         setpgid(pid,pid);
         wpid = waitpid(pid, NULL, 0);
+        tcsetpgrp(shell_terminal, getpgrp());
     }
     return 1;
 }
