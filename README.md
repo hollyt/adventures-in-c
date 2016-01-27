@@ -12,6 +12,7 @@ of bash. :baby:
 - [ ] shell config files
 - [x] launch new programs
 - [x] shell builtins
-- [ ] tilde expansion of paths
+- [x] tilde expansion of paths
 - [ ] autocompletion
 - [x] shell sessions
+- [ ] history
