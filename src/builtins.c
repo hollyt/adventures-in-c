@@ -3,7 +3,20 @@
 /* SHELL BUILTIN FUNCTIONS */
 
 int bshell_cd(char **args) {
-    if (chdir(args[1]) == -1) {
+    const char *path = args[1];
+    char *home_env = getenv("HOME");
+
+    if (home_env) {
+        /*tilde expansion*/
+        if (strchr(path, '~')) {
+            strcat(home_env, path+1);
+            if (chdir(home_env) == -1) {
+                perror("bshell");
+            }
+        }
+    }
+
+    else if (chdir(args[1]) == -1) {
         perror("bshell");
     }
     return 1;

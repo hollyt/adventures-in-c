@@ -2,6 +2,8 @@
 #define BUILTINS_H
 
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 /* SHELL BUILTINS */
 int bshell_cd(char **args);

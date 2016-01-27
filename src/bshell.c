@@ -80,9 +80,10 @@ void commands() {
         cwp = get_current_dir_name();
         cwd = strrchr(cwp,'/');
         printf("(>**)> **%s** ",cwd+1);
+        /*get inut*/
         n = getline(&line, &len, stdin);
         if (n == -1) { /*EOF entered*/
-            perror("bshell");
+            /*perror("bshell");*/
             status = bshell_exit();
         }
         else if (line[0] != '\n') { /*nothing is entered*/
