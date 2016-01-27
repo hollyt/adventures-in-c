@@ -5,8 +5,8 @@ because it currently has only a small subset of the functionality
 of bash. :baby:
 
 ## Compile && run
-`gcc bshell.c`   
-`./a.out`
+`make` then   
+`./bshell`
 
 ## TODO
 - [ ] shell config files
