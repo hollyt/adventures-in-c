@@ -14,9 +14,11 @@ int bshell_cd(char **args) {
                 perror("bshell");
             }
         }
+        else if (chdir(args[1]) == -1) {
+            perror("bshell");
+        }
     }
-
-    else if (chdir(args[1]) == -1) {
+    else {
         perror("bshell");
     }
     return 1;
