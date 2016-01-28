@@ -13,6 +13,6 @@ of bash. :baby:
 - [x] launch new programs
 - [x] shell builtins
 - [x] tilde expansion of paths
-- [ ] autocompletion
+- [x] autocompletion
 - [x] shell sessions
-- [ ] history
+- [x] history
