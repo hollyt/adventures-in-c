@@ -6,6 +6,9 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <readline/readline.h>
+#include <readline/history.h>
+
 #include "builtins.h"
 #include "job_control.h"
 
@@ -66,39 +69,21 @@ void init_shell() {
 }
 
 void commands() {
-    char *line = NULL;
+    const char *prompt = "(>**)> ";
+    char *line;
     char **args = NULL;
-    char *cwp, *cwd;
-    char **iterator = NULL;
-    size_t len = 0;
-    int i = 0,
-        n = 0,
-        status = 1;
+    int status = 1;
 
     do {
-        /*print current dir - full path is too long*/
-        cwp = get_current_dir_name();
-        cwd = strrchr(cwp,'/');
-        printf("(>**)> **%s** ",cwd+1);
-        /*get inut*/
-        n = getline(&line, &len, stdin);
-        if (n == -1) { /*EOF entered*/
-            /*perror("bshell");*/
+        line = readline(prompt);
+        if (*line == EOF) { //EOF entered
             status = bshell_exit();
         }
-        else if (line[0] != '\n') { /*nothing is entered*/
-            /*replace newline with null*/
-            for (i = len-1; i >= 0; i--) {
-                if (line[i] == '\n') {
-                    line[i] = '\0';
-                }
-            }
-            args = parse_args(line);
-            status = execute(args);
-        }
+        add_history(line);
+        args = parse_args(line);
+        status = execute(args);
 
         /*cleanup*/
-        free(cwp);
         free(line);
         line = NULL;
     } while(status);

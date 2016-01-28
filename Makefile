@@ -1,9 +1,10 @@
 CC = gcc
 SOURCES = $(wildcard src/*.c)
 OBJS = $(SOURCES:.c=.o)
+COPTS = -lreadline -Wall -Wextra
 
 bshell: $(OBJS)
-	$(CC) $(OBJS) -o bshell
+	$(CC) $(COPTS) $(OBJS) -o bshell
 
 .PHONY: clean
 clean:
