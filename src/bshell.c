@@ -5,12 +5,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <termios.h>
+#include <unistd.h>
 
 #include <readline/readline.h>
 #include <readline/history.h>
 
 #include "builtins.h"
-#include "job_control.h"
 
 void init_shell();
 void commands(void);
@@ -18,6 +19,8 @@ char **parse_args(char *line);
 int launch_process(char **args);
 int execute(char **args);
 
+/*for process control*/
+struct termios shell_tmodes;
 int shell_terminal;
 
 /* MAIN */
